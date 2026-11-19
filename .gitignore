@@ -1,0 +1,12 @@
+# Données personnelles (NE JAMAIS COMMIT)
+*.db
+*.sqlite
+*.xlsx
+
+# Environnement Python & Cache
+__pycache__/
+*.pyc
+venv/
+.venv/
+.env
+.vscode/
