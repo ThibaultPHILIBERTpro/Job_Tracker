@@ -21,7 +21,7 @@ Concevoir un outil local et autonome pour centraliser, piloter et analyser une r
 ## Roadmap & Versionning
 
 ### v1.1: Ergonomie & Suivi de Candidature
-- [ ] Ajout d'un script `Fake_data.py` pour générer une base fictive de démonstration en 1 clic.
+- [x] Ajout d'un script `Fake_data.py` pour générer une base fictive de démonstration en 1 clic.
 - [ ] Affichage et accès direct au lien URL de l'offre depuis la fiche détaillée.
 - [ ] Affichage visible de la date de candidature dans la fiche.
 - [ ] Ajout d'un champ pour tracer la version du **CV envoyé** pour chaque offre.
