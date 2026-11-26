@@ -23,7 +23,7 @@ Concevoir un outil local et autonome pour centraliser, piloter et analyser une r
 ### v1.1: Ergonomie & Suivi de Candidature
 - [x] Ajout d'un script `Fake_data.py` pour générer une base fictive de démonstration en 1 clic.
 - [X] Affichage et accès direct au lien URL de l'offre depuis la fiche détaillée.
-- [ ] Affichage visible de la date de candidature dans la fiche.
+- [X] Affichage visible de la date de candidature dans la fiche.
 - [ ] Ajout d'un champ pour tracer la version du **CV envoyé** pour chaque offre.
 
 ### v1.2: Gestion Avancée des Relances & Réseau (LinkedIn)

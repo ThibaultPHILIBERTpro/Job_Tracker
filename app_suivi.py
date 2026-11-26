@@ -395,7 +395,7 @@ class JobTrackerApp(ctk.CTk):
                           ("Entretien", e_date.get(), e_details.get("1.0", "end-1c"), cand_id))
             else:
                 c.execute("UPDATE candidatures SET statut=?, date_entretien_3=?, details_entretien_3=? WHERE id=?", 
-                          ("Entretien", e_date.get(), e_details.get("1.0", "end-1c"), cand_id))
+                        ("Entretien", e_date.get(), e_details.get("1.0", "end-1c"), cand_id))
             conn.commit()
             conn.close()
             self.load_data()
@@ -418,7 +418,7 @@ class JobTrackerApp(ctk.CTk):
             conn = sqlite3.connect(DB_NAME)
             c = conn.cursor()
             c.execute("UPDATE candidatures SET statut=?, motif_refus=? WHERE id=?", 
-                      ("Refus", e_motif.get("1.0", "end-1c"), cand_id))
+                    ("Refus", e_motif.get("1.0", "end-1c"), cand_id))
             conn.commit()
             conn.close()
             self.load_data()
@@ -436,7 +436,7 @@ class JobTrackerApp(ctk.CTk):
         c = conn.cursor()
         c.execute('''SELECT entreprise, poste, lieu, type_poste, salaire, avantages, source, contact, url, 
                     remarques, offre_texte, lettre_motivation, date_entretien, details_entretien, motif_refus, statut,
-                    date_entretien_2, details_entretien_2, date_entretien_3, details_entretien_3
+                    date_entretien_2, details_entretien_2, date_entretien_3, details_entretien_3, date_candidature
                     FROM candidatures WHERE id=?''', (cand_id,))
         row = c.fetchone()
         conn.close()
@@ -516,6 +516,11 @@ class JobTrackerApp(ctk.CTk):
 
         ctk.CTkButton(f_haut, text=" Ouvrir l'offre", command=ouvrir_url, fg_color="#2980B9", width=150).grid(row=3, column=5, padx=5, pady=5)
 
+        ctk.CTkLabel(f_haut, text="Date candidature:", font=("Arial", 12, "bold")).grid(row=4, column=0, padx=5, pady=5, sticky="e")
+        e_date_cand = ctk.CTkEntry(f_haut, width=150)
+        e_date_cand.insert(0, row[20] or "")
+        e_date_cand.grid(row=4, column=1, padx=5, pady=5, sticky="w")
+
         ctk.CTkLabel(scroll, text="Remarques :").pack(anchor="w", padx=10, pady=(10,0))
         e_rem = ctk.CTkTextbox(scroll, width=1000, height=60)
         e_rem.insert("1.0", row[9] or "")
@@ -567,11 +572,11 @@ class JobTrackerApp(ctk.CTk):
             conn = sqlite3.connect(DB_NAME)
             c = conn.cursor()
             c.execute('''UPDATE candidatures SET entreprise=?, poste=?, lieu=?, type_poste=?, salaire=?, avantages=?, 
-                        source=?, contact=?, url=?, statut=?, remarques=?, offre_texte=?, lettre_motivation=?, 
+                        source=?, contact=?, url=?, statut=?, date_candidature=?, remarques=?, offre_texte=?, lettre_motivation=?, 
                         date_entretien=?, details_entretien=?, motif_refus=?,
                         date_entretien_2=?, details_entretien_2=?, date_entretien_3=?, details_entretien_3=? WHERE id=?''', 
                     (e_ent.get(), e_poste.get(), e_lieu.get(), e_type.get(), e_sal.get(), e_av.get(), 
-                    e_src.get(), e_cont.get(), e_url.get().strip(), e_stat.get(), e_rem.get("1.0", "end-1c"), e_offre.get("1.0", "end-1c"), 
+                    e_src.get(), e_cont.get(), e_url.get().strip(), e_stat.get(), e_date_cand.get().strip(), e_rem.get("1.0", "end-1c"), e_offre.get("1.0", "end-1c"), 
                     e_lettre.get("1.0", "end-1c"), e_d_ent1.get(), e_det_ent1.get(), e_m_ref.get("1.0", "end-1c"),
                     e_d_ent2.get(), e_det_ent2.get(), e_d_ent3.get(), e_det_ent3.get(), cand_id))
             conn.commit()
