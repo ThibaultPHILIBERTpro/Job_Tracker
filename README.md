@@ -1,11 +1,11 @@
 # Job Tracker : Application Desktop de Suivi de Candidatures
 
-`v1.0 — En développement` · `Python 3.13` · `SQLite3` · `CustomTkinter`
+`v1.1 - En développement` · `Python 3.13` · `SQLite3` · `CustomTkinter`
 
 ## Objectif du Projet
 Concevoir un outil local et autonome pour centraliser, piloter et analyser une recherche d'emploi. L'application remplace le traditionnel tableau Excel manuel par une base de données relationnelle SQLite couplée à une interface graphique moderne et des alertes automatiques de relance.
 
-## Fonctionnalités actuelles (v1.0)
+## Fonctionnalités actuelles (v1.1)
 * **Tableau de bord & KPIs en temps réel :** Suivi des candidatures du jour, détection automatique des relances urgentes (J+15), relances à venir (< 3 jours) et processus d'entretiens actifs.
 * **Base de données SQLite évolutive :** Initialisation automatique et gestion dynamique des migrations de schéma (`PRAGMA table_info` + `ALTER TABLE`) sans perte de données.
 * **Mode Rapide (Web Scraping — *Bêta*) :** Pré-remplissage du titre et détection de la plateforme (LinkedIn, APEC, WTTJ, France Travail) depuis l'URL de l'offre en arrière-plan (`threading`).
