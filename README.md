@@ -25,6 +25,7 @@ Concevoir un outil local et autonome pour centraliser, piloter et analyser une r
 - [X] Affichage et accès direct au lien URL de l'offre depuis la fiche détaillée.
 - [X] Affichage visible de la date de candidature dans la fiche.
 - [x] Ajout d'un champ obligatoire pour tracer la version du **CV envoyé** pour chaque offre (migration rétroactive en "CV Hybride" pour l'historique).
+- [x] Ajout de **Meteojob** dans les sources + champs *Type de contrat* et *Source* vides par défaut et obligatoires en saisie.
 
 ### v1.2: Gestion Avancée des Relances & Réseau (LinkedIn)
 - [ ] Option par annonce pour désactiver les relances ou personnaliser le délai de relance.

@@ -107,7 +107,7 @@ class JobTrackerApp(ctk.CTk):
         ctk.CTkLabel(form_frame, text="Type:").grid(row=1, column=0, padx=5, pady=5, sticky="e")
         self.type_combo = ctk.CTkComboBox(form_frame, values=["CDI", "CDD", "Intérim", "Stage", "Alternance", "Freelance"], width=200)
         self.type_combo.grid(row=1, column=1, padx=5, pady=5)
-        self.type_combo.set("CDI")
+        self.type_combo.set("")
 
         ctk.CTkLabel(form_frame, text="Salaire:").grid(row=1, column=2, padx=5, pady=5, sticky="e")
         self.salaire_entry = ctk.CTkEntry(form_frame, width=250)
@@ -118,8 +118,9 @@ class JobTrackerApp(ctk.CTk):
         self.avantages_entry.grid(row=1, column=5, padx=5, pady=5)
 
         ctk.CTkLabel(form_frame, text="Source:").grid(row=2, column=0, padx=5, pady=5, sticky="e")
-        self.source_combo = ctk.CTkComboBox(form_frame, values=["Welcome to the Jungle", "APEC", "France Travail", "LinkedIn", "HelloWork", "Indeed","Autre"], width=200)
+        self.source_combo = ctk.CTkComboBox(form_frame, values=["Welcome to the Jungle", "APEC", "France Travail", "LinkedIn", "HelloWork", "Indeed", "Meteojob", "Autre"], width=200)
         self.source_combo.grid(row=2, column=1, padx=5, pady=5)
+        self.source_combo.set("")
 
         ctk.CTkLabel(form_frame, text="Contact:").grid(row=2, column=2, padx=5, pady=5, sticky="e")
         self.contact_entry = ctk.CTkEntry(form_frame, width=250)
@@ -276,6 +277,9 @@ class JobTrackerApp(ctk.CTk):
             elif "apec" in url: self.source_combo.set("APEC")
             elif "linkedin" in url: self.source_combo.set("LinkedIn")
             elif "francetravail" in url or "pole-emploi" in url: self.source_combo.set("France Travail")
+            elif "hellowork" in url: self.source_combo.set("HelloWork")
+            elif "indeed" in url: self.source_combo.set("Indeed")
+            elif "meteojob" in url: self.source_combo.set("Meteojob")
             self.tabs.set("3. ✍️ Mode Saisie")
         except: pass
         finally: self.btn_scrape.configure(text="Analyser l'URL")
@@ -283,9 +287,11 @@ class JobTrackerApp(ctk.CTk):
     def add_candidature(self):
         ent = self.entreprise_entry.get().strip()
         poste = self.poste_entry.get().strip()
+        type_poste = self.type_combo.get().strip()
+        source = self.source_combo.get().strip()
         cv = self.cv_combo.get().strip()
-        if not ent or not poste or not cv:
-            return messagebox.showwarning("Attention", "Entreprise, poste et CV envoyé sont obligatoires.")
+        if not all([ent, poste, type_poste, source, cv]):
+            return messagebox.showwarning("Attention", "Entreprise, poste, type de contrat, source et CV envoyé sont obligatoires.")
         
         date_cand = datetime.now().strftime("%Y-%m-%d")
         date_r1 = (datetime.now() + timedelta(days=15)).strftime("%Y-%m-%d")
@@ -304,6 +310,8 @@ class JobTrackerApp(ctk.CTk):
         self.offre_texte_textbox.delete("1.0", "end")
         self.lettre_textbox.delete("1.0", "end")
         self.cv_combo.set("")
+        self.type_combo.set("")
+        self.source_combo.set("")
         
         self.load_data()
         self.export_excel(silent=True)
@@ -499,7 +507,7 @@ class JobTrackerApp(ctk.CTk):
         e_av.grid(row=1, column=5, padx=5, pady=5)
 
         ctk.CTkLabel(f_haut, text="Source:").grid(row=2, column=0, padx=5, pady=5, sticky="e")
-        e_src = ctk.CTkComboBox(f_haut, values=["Welcome to the Jungle", "APEC", "France Travail", "LinkedIn", "HelloWork","Indeed", "Autre"], width=150)
+        e_src = ctk.CTkComboBox(f_haut, values=["Welcome to the Jungle", "APEC", "France Travail", "LinkedIn", "HelloWork", "Indeed", "Meteojob", "Autre"], width=150)
         e_src.set(row[6] if row[6] else "APEC")
         e_src.grid(row=2, column=1, padx=5, pady=5)
 
