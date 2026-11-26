@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 import threading
 import xlsxwriter
 import os
+import webbrowser
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
@@ -281,8 +282,8 @@ class JobTrackerApp(ctk.CTk):
         conn = sqlite3.connect(DB_NAME)
         c = conn.cursor()
         c.execute('''INSERT INTO candidatures 
-                     (entreprise, poste, lieu, type_poste, salaire, avantages, source, url, date_candidature, statut, date_relance_1, contact, remarques, offre_texte, lettre_motivation)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', 
+                    (entreprise, poste, lieu, type_poste, salaire, avantages, source, url, date_candidature, statut, date_relance_1, contact, remarques, offre_texte, lettre_motivation)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', 
                   (ent, poste, self.lieu_combo.get(), self.type_combo.get(), self.salaire_entry.get(), self.avantages_entry.get(), self.source_combo.get(), self.url_manuel_entry.get(), date_cand, "Envoyé", date_r1, self.contact_entry.get(), self.remarques_textbox.get("1.0", "end-1c"), self.offre_texte_textbox.get("1.0", "end-1c"), self.lettre_textbox.get("1.0", "end-1c")))
         conn.commit()
         conn.close()
@@ -434,9 +435,9 @@ class JobTrackerApp(ctk.CTk):
         conn = sqlite3.connect(DB_NAME)
         c = conn.cursor()
         c.execute('''SELECT entreprise, poste, lieu, type_poste, salaire, avantages, source, contact, url, 
-                     remarques, offre_texte, lettre_motivation, date_entretien, details_entretien, motif_refus, statut,
-                     date_entretien_2, details_entretien_2, date_entretien_3, details_entretien_3
-                     FROM candidatures WHERE id=?''', (cand_id,))
+                    remarques, offre_texte, lettre_motivation, date_entretien, details_entretien, motif_refus, statut,
+                    date_entretien_2, details_entretien_2, date_entretien_3, details_entretien_3
+                    FROM candidatures WHERE id=?''', (cand_id,))
         row = c.fetchone()
         conn.close()
         if not row: return
@@ -500,6 +501,21 @@ class JobTrackerApp(ctk.CTk):
         e_stat.set(row[15] if row[15] else "Envoyé")
         e_stat.grid(row=2, column=5, padx=5, pady=5)
 
+        ctk.CTkLabel(f_haut, text="URL de l'offre:").grid(row=3, column=0, padx=5, pady=5, sticky="e")
+        e_url = ctk.CTkEntry(f_haut, width=550)
+        e_url.insert(0, row[8] or "")
+        e_url.grid(row=3, column=1, columnspan=4, padx=5, pady=5, sticky="ew")
+
+        def ouvrir_url():
+            lien = e_url.get().strip()
+            if not lien:
+                return messagebox.showwarning("Lien manquant", "Aucune URL enregistrée pour cette offre.")
+            if not lien.startswith(("http://", "https://")):
+                lien = "https://" + lien
+            webbrowser.open(lien)
+
+        ctk.CTkButton(f_haut, text=" Ouvrir l'offre", command=ouvrir_url, fg_color="#2980B9", width=150).grid(row=3, column=5, padx=5, pady=5)
+
         ctk.CTkLabel(scroll, text="Remarques :").pack(anchor="w", padx=10, pady=(10,0))
         e_rem = ctk.CTkTextbox(scroll, width=1000, height=60)
         e_rem.insert("1.0", row[9] or "")
@@ -551,13 +567,13 @@ class JobTrackerApp(ctk.CTk):
             conn = sqlite3.connect(DB_NAME)
             c = conn.cursor()
             c.execute('''UPDATE candidatures SET entreprise=?, poste=?, lieu=?, type_poste=?, salaire=?, avantages=?, 
-                         source=?, contact=?, statut=?, remarques=?, offre_texte=?, lettre_motivation=?, 
-                         date_entretien=?, details_entretien=?, motif_refus=?,
-                         date_entretien_2=?, details_entretien_2=?, date_entretien_3=?, details_entretien_3=? WHERE id=?''', 
-                      (e_ent.get(), e_poste.get(), e_lieu.get(), e_type.get(), e_sal.get(), e_av.get(), 
-                       e_src.get(), e_cont.get(), e_stat.get(), e_rem.get("1.0", "end-1c"), e_offre.get("1.0", "end-1c"), 
-                       e_lettre.get("1.0", "end-1c"), e_d_ent1.get(), e_det_ent1.get(), e_m_ref.get("1.0", "end-1c"),
-                       e_d_ent2.get(), e_det_ent2.get(), e_d_ent3.get(), e_det_ent3.get(), cand_id))
+                        source=?, contact=?, url=?, statut=?, remarques=?, offre_texte=?, lettre_motivation=?, 
+                        date_entretien=?, details_entretien=?, motif_refus=?,
+                        date_entretien_2=?, details_entretien_2=?, date_entretien_3=?, details_entretien_3=? WHERE id=?''', 
+                    (e_ent.get(), e_poste.get(), e_lieu.get(), e_type.get(), e_sal.get(), e_av.get(), 
+                    e_src.get(), e_cont.get(), e_url.get().strip(), e_stat.get(), e_rem.get("1.0", "end-1c"), e_offre.get("1.0", "end-1c"), 
+                    e_lettre.get("1.0", "end-1c"), e_d_ent1.get(), e_det_ent1.get(), e_m_ref.get("1.0", "end-1c"),
+                    e_d_ent2.get(), e_det_ent2.get(), e_d_ent3.get(), e_det_ent3.get(), cand_id))
             conn.commit()
             conn.close()
             self.load_data()
