@@ -24,7 +24,7 @@ Concevoir un outil local et autonome pour centraliser, piloter et analyser une r
 - [x] Ajout d'un script `Fake_data.py` pour générer une base fictive de démonstration en 1 clic.
 - [X] Affichage et accès direct au lien URL de l'offre depuis la fiche détaillée.
 - [X] Affichage visible de la date de candidature dans la fiche.
-- [ ] Ajout d'un champ pour tracer la version du **CV envoyé** pour chaque offre.
+- [x] Ajout d'un champ obligatoire pour tracer la version du **CV envoyé** pour chaque offre (migration rétroactive en "CV Hybride" pour l'historique).
 
 ### v1.2: Gestion Avancée des Relances & Réseau (LinkedIn)
 - [ ] Option par annonce pour désactiver les relances ou personnaliser le délai de relance.

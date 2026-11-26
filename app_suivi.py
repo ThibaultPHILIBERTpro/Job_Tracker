@@ -48,11 +48,15 @@ class JobTrackerApp(ctk.CTk):
             "lettre_motivation": "TEXT", "date_entretien": "TEXT",
             "details_entretien": "TEXT", "motif_refus": "TEXT",
             "date_entretien_2": "TEXT", "details_entretien_2": "TEXT",
-            "date_entretien_3": "TEXT", "details_entretien_3": "TEXT"
+            "date_entretien_3": "TEXT", "details_entretien_3": "TEXT",
+            "cv_envoye": "TEXT"
         }
         for col_name, col_type in colonnes_a_verifier.items():
             if col_name not in colonnes_existantes:
                 c.execute(f"ALTER TABLE candidatures ADD COLUMN {col_name} {col_type}")
+
+        # Remplissage rétroactif par défaut pour les anciennes candidatures
+        c.execute("UPDATE candidatures SET cv_envoye = 'CV Hybride' WHERE cv_envoye IS NULL OR cv_envoye = ''")
         conn.commit()
         conn.close()
 
@@ -125,20 +129,25 @@ class JobTrackerApp(ctk.CTk):
         self.url_manuel_entry = ctk.CTkEntry(form_frame, width=150)
         self.url_manuel_entry.grid(row=2, column=5, padx=5, pady=5)
 
-        ctk.CTkLabel(form_frame, text="Remarques:").grid(row=3, column=0, padx=5, pady=5, sticky="ne")
-        self.remarques_textbox = ctk.CTkTextbox(form_frame, width=800, height=40)
-        self.remarques_textbox.grid(row=3, column=1, columnspan=5, padx=5, pady=5, sticky="w")
+        ctk.CTkLabel(form_frame, text="CV envoyé:").grid(row=3, column=0, padx=5, pady=5, sticky="e")
+        self.cv_combo = ctk.CTkComboBox(form_frame, values=["CV Hybride", "CV Business", "CV Tech", "Autre"], width=200)
+        self.cv_combo.grid(row=3, column=1, padx=5, pady=5)
+        self.cv_combo.set("")
 
-        ctk.CTkLabel(form_frame, text="Texte offre:").grid(row=4, column=0, padx=5, pady=5, sticky="ne")
+        ctk.CTkLabel(form_frame, text="Remarques:").grid(row=4, column=0, padx=5, pady=5, sticky="ne")
+        self.remarques_textbox = ctk.CTkTextbox(form_frame, width=800, height=40)
+        self.remarques_textbox.grid(row=4, column=1, columnspan=5, padx=5, pady=5, sticky="w")
+
+        ctk.CTkLabel(form_frame, text="Texte offre:").grid(row=5, column=0, padx=5, pady=5, sticky="ne")
         self.offre_texte_textbox = ctk.CTkTextbox(form_frame, width=800, height=120)
-        self.offre_texte_textbox.grid(row=4, column=1, columnspan=5, padx=5, pady=5, sticky="w")
+        self.offre_texte_textbox.grid(row=5, column=1, columnspan=5, padx=5, pady=5, sticky="w")
         
-        ctk.CTkLabel(form_frame, text="Lettre Motiv:").grid(row=5, column=0, padx=5, pady=5, sticky="ne")
+        ctk.CTkLabel(form_frame, text="Lettre Motiv:").grid(row=6, column=0, padx=5, pady=5, sticky="ne")
         self.lettre_textbox = ctk.CTkTextbox(form_frame, width=800, height=120)
-        self.lettre_textbox.grid(row=5, column=1, columnspan=5, padx=5, pady=5, sticky="w")
+        self.lettre_textbox.grid(row=6, column=1, columnspan=5, padx=5, pady=5, sticky="w")
 
         self.add_btn = ctk.CTkButton(form_frame, text="Valider & Ajouter", command=self.add_candidature, fg_color="#27AE60", width=300, height=40, font=("Arial", 14, "bold"))
-        self.add_btn.grid(row=6, column=1, columnspan=5, pady=15)
+        self.add_btn.grid(row=7, column=1, columnspan=5, pady=15)
 
         # ================= ONGLET 4 : FILTRES & BASE =================
         filter_frame = ctk.CTkFrame(self.tab_db)
@@ -272,19 +281,21 @@ class JobTrackerApp(ctk.CTk):
         finally: self.btn_scrape.configure(text="Analyser l'URL")
 
     def add_candidature(self):
-        ent = self.entreprise_entry.get()
-        poste = self.poste_entry.get()
-        if not ent or not poste: return messagebox.showwarning("Attention", "Entreprise et poste obligatoires.")
-
+        ent = self.entreprise_entry.get().strip()
+        poste = self.poste_entry.get().strip()
+        cv = self.cv_combo.get().strip()
+        if not ent or not poste or not cv:
+            return messagebox.showwarning("Attention", "Entreprise, poste et CV envoyé sont obligatoires.")
+        
         date_cand = datetime.now().strftime("%Y-%m-%d")
         date_r1 = (datetime.now() + timedelta(days=15)).strftime("%Y-%m-%d")
         
         conn = sqlite3.connect(DB_NAME)
         c = conn.cursor()
         c.execute('''INSERT INTO candidatures 
-                    (entreprise, poste, lieu, type_poste, salaire, avantages, source, url, date_candidature, statut, date_relance_1, contact, remarques, offre_texte, lettre_motivation)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', 
-                  (ent, poste, self.lieu_combo.get(), self.type_combo.get(), self.salaire_entry.get(), self.avantages_entry.get(), self.source_combo.get(), self.url_manuel_entry.get(), date_cand, "Envoyé", date_r1, self.contact_entry.get(), self.remarques_textbox.get("1.0", "end-1c"), self.offre_texte_textbox.get("1.0", "end-1c"), self.lettre_textbox.get("1.0", "end-1c")))
+                    (entreprise, poste, lieu, type_poste, salaire, avantages, source, url, date_candidature, statut, date_relance_1, contact, remarques, offre_texte, lettre_motivation, cv_envoye)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', 
+                (ent, poste, self.lieu_combo.get(), self.type_combo.get(), self.salaire_entry.get(), self.avantages_entry.get(), self.source_combo.get(), self.url_manuel_entry.get(), date_cand, "Envoyé", date_r1, self.contact_entry.get(), self.remarques_textbox.get("1.0", "end-1c"), self.offre_texte_textbox.get("1.0", "end-1c"), self.lettre_textbox.get("1.0", "end-1c"), self.cv_combo.get()))
         conn.commit()
         conn.close()
         
@@ -292,6 +303,7 @@ class JobTrackerApp(ctk.CTk):
         self.remarques_textbox.delete("1.0", "end")
         self.offre_texte_textbox.delete("1.0", "end")
         self.lettre_textbox.delete("1.0", "end")
+        self.cv_combo.set("")
         
         self.load_data()
         self.export_excel(silent=True)
@@ -436,7 +448,7 @@ class JobTrackerApp(ctk.CTk):
         c = conn.cursor()
         c.execute('''SELECT entreprise, poste, lieu, type_poste, salaire, avantages, source, contact, url, 
                     remarques, offre_texte, lettre_motivation, date_entretien, details_entretien, motif_refus, statut,
-                    date_entretien_2, details_entretien_2, date_entretien_3, details_entretien_3, date_candidature
+                    date_entretien_2, details_entretien_2, date_entretien_3, details_entretien_3, date_candidature, cv_envoye
                     FROM candidatures WHERE id=?''', (cand_id,))
         row = c.fetchone()
         conn.close()
@@ -521,6 +533,11 @@ class JobTrackerApp(ctk.CTk):
         e_date_cand.insert(0, row[20] or "")
         e_date_cand.grid(row=4, column=1, padx=5, pady=5, sticky="w")
 
+        ctk.CTkLabel(f_haut, text="CV envoyé:", font=("Arial", 12, "bold")).grid(row=4, column=2, padx=5, pady=5, sticky="e")
+        e_cv = ctk.CTkComboBox(f_haut, values=["CV Hybride", "CV Business", "CV Tech", "Autre"], width=200)
+        e_cv.set(row[21] if row[21] else "CV Hybride")
+        e_cv.grid(row=4, column=3, padx=5, pady=5, sticky="w")
+
         ctk.CTkLabel(scroll, text="Remarques :").pack(anchor="w", padx=10, pady=(10,0))
         e_rem = ctk.CTkTextbox(scroll, width=1000, height=60)
         e_rem.insert("1.0", row[9] or "")
@@ -572,11 +589,11 @@ class JobTrackerApp(ctk.CTk):
             conn = sqlite3.connect(DB_NAME)
             c = conn.cursor()
             c.execute('''UPDATE candidatures SET entreprise=?, poste=?, lieu=?, type_poste=?, salaire=?, avantages=?, 
-                        source=?, contact=?, url=?, statut=?, date_candidature=?, remarques=?, offre_texte=?, lettre_motivation=?, 
+                        source=?, contact=?, url=?, statut=?, date_candidature=?, cv_envoye=?, remarques=?, offre_texte=?, lettre_motivation=?, 
                         date_entretien=?, details_entretien=?, motif_refus=?,
                         date_entretien_2=?, details_entretien_2=?, date_entretien_3=?, details_entretien_3=? WHERE id=?''', 
                     (e_ent.get(), e_poste.get(), e_lieu.get(), e_type.get(), e_sal.get(), e_av.get(), 
-                    e_src.get(), e_cont.get(), e_url.get().strip(), e_stat.get(), e_date_cand.get().strip(), e_rem.get("1.0", "end-1c"), e_offre.get("1.0", "end-1c"), 
+                    e_src.get(), e_cont.get(), e_url.get().strip(), e_stat.get(), e_date_cand.get().strip(), e_cv.get(), e_rem.get("1.0", "end-1c"), e_offre.get("1.0", "end-1c"), 
                     e_lettre.get("1.0", "end-1c"), e_d_ent1.get(), e_det_ent1.get(), e_m_ref.get("1.0", "end-1c"),
                     e_d_ent2.get(), e_det_ent2.get(), e_d_ent3.get(), e_det_ent3.get(), cand_id))
             conn.commit()
@@ -592,9 +609,9 @@ class JobTrackerApp(ctk.CTk):
             conn = sqlite3.connect(DB_NAME)
             c = conn.cursor()
             c.execute('''SELECT id, entreprise, poste, lieu, type_poste, salaire, avantages, source, url, 
-                         date_candidature, statut, date_relance_1, date_relance_2, contact, remarques, 
-                         date_entretien, details_entretien, date_entretien_2, details_entretien_2, 
-                         date_entretien_3, details_entretien_3, motif_refus FROM candidatures''')
+                        date_candidature, statut, cv_envoye, date_relance_1, date_relance_2, contact, remarques, 
+                        date_entretien, details_entretien, date_entretien_2, details_entretien_2, 
+                        date_entretien_3, details_entretien_3, motif_refus FROM candidatures''')
             rows = c.fetchall()
             columns = [desc[0].upper() for desc in c.description]
             conn.close()
